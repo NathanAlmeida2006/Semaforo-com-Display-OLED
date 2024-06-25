@@ -1,0 +1,50 @@
+sequenceDiagram
+    participant BotãoPedestre
+    participant BotãoIntermitente
+    participant Arduino
+    participant DisplayOLED
+    participant Buzzer
+    participant LEDs
+
+    Note over Arduino: Configuração Inicial
+    Arduino->>DisplayOLED: Inicializa display
+    Arduino->>LEDs: Define estado inicial (Carros Verde, Pedestres Vermelho)
+
+    loop Verifica Botões
+        BotãoPedestre->>Arduino: Pressiona botão pedestre
+        BotãoIntermitente->>Arduino: Pressiona botão intermitente
+        Arduino->>Arduino: Atualiza estado conforme necessidade
+    end
+
+    alt Estado CARROS_VERDE
+        Arduino->>LEDs: Acende Carros Verde
+        Arduino->>LEDs: Apaga Pedestre Verde
+        Arduino->>LEDs: Acende Pedestre Vermelho
+        Arduino->>DisplayOLED: Mostrar "NÃO ANDE"
+    end
+
+    alt Estado CARROS_AMARELO
+        Arduino->>LEDs: Acende Carros Amarelo
+        Arduino->>DisplayOLED: Mostrar "PREPARE-SE"
+    end
+
+    alt Estado CARROS_VERMELHO_PEDESTRE_VERDE
+        Arduino->>LEDs: Acende Carros Vermelho
+        Arduino->>LEDs: Apaga Pedestre Vermelho
+        Arduino->>LEDs: Acende Pedestre Verde
+        Arduino->>DisplayOLED: Mostrar "ANDE"
+        Arduino->>Arduino: Inicia contagem regressiva
+        loop Contagem Regressiva
+            Arduino->>DisplayOLED: Atualiza contagem regressiva
+            alt Últimos segundos
+                Arduino->>Buzzer: Emite som
+            end
+        end
+    end
+
+    alt Estado INTERMITENTE
+        loop Modo Intermitente
+            Arduino->>LEDs: Pisca LED intermitente
+            Arduino->>DisplayOLED: Mostrar "AVISO"
+        end
+    end
